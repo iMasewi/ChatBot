@@ -12,11 +12,10 @@ namespace Chat.Controllers
     public class MessageController : ControllerBase
     {
         private readonly IMessagesService _messagesService;
-        private readonly HttpClient _httpClient;
-        public MessageController(IMessagesService messagesService, IHttpClientFactory httpClient)
+        
+        public MessageController(IMessagesService messagesService)
         {
             _messagesService = messagesService;
-            _httpClient = httpClient.CreateClient();
         }
 
         [HttpPost()]
@@ -29,29 +28,12 @@ namespace Chat.Controllers
             }
             try
             {
-                messagesDTO.User = "User";
-                var result = await _messagesService.AddMessageAsync(messagesDTO);
-
-                var response = await _httpClient.GetAsync($"http://127.0.0.1:8000/search?query={messagesDTO.Content}");
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (!response.IsSuccessStatusCode)
+                string content = await _messagesService.AddMessageAsync(messagesDTO);
+                if (string.IsNullOrEmpty(content))
                 {
-                    return StatusCode((int)response.StatusCode, $"Error from external service: {responseContent}");
+                    return BadRequest("Failed to add message.");
                 }
-
-                // Parse JSON để lấy giá trị "context"
-                using var jsonDoc = JsonDocument.Parse(responseContent);
-                string content = jsonDoc.RootElement.GetProperty("context").GetString();
-
-                var newMessageDTO = new MessagesDTO
-                {
-                    User = "AI",
-                    Content = content,
-                    ConversationId = messagesDTO.ConversationId
-                };
-                var newMessageResult = await _messagesService.AddMessageAsync(newMessageDTO);
-
-                return Ok(new {content = content}); 
+                return Ok(new { Content = content });
             }
             catch (Exception ex)
             {
@@ -59,6 +41,31 @@ namespace Chat.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> UpdateMessageAsync([FromBody] MessagesDTO messagesDTO)
+        {
+            if (messagesDTO == null)
+            {
+                return BadRequest("Message data cannot be null.");
+            }
+            try
+            {
+                string content = await _messagesService.UpdateMessagesAsync(messagesDTO);
+                if (string.IsNullOrEmpty(content))
+                {
+                    return BadRequest("Failed to update message.");
+                }
+                return Ok(content);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMessageAsync(int id)
         {

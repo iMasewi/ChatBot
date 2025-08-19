@@ -64,6 +64,12 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()   // Cho phép t?t c? domain (dev)
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 // ??ng ký Identity
@@ -133,7 +139,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

@@ -6,7 +6,8 @@ namespace Chat.Service.Interfaces
     {
         Task<IEnumerable<MessagesDTO>> GetMessagesByConversationIdAsync(int conversationId);
         Task<MessagesDTO> GetMessageByIdAsync(int id);
-        Task<MessagesDTO> AddMessageAsync(MessagesDTO messagesDTO);
+        Task<String> AddMessageAsync(MessagesDTO messagesDTO);
+        Task<String> UpdateMessagesAsync(MessagesDTO messagesDTO);
         Task DeleteMessageAsync(int id);
     }
 }

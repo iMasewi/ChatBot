@@ -76,7 +76,7 @@ namespace Chat.Controllers
                     Role = role,
                     CreatedAt = createdAt
                 };
-                return Ok(new { user = user });
+                return Ok(user);
             } catch (Exception ex)
             {
                 throw new Exception(ex.Message);
