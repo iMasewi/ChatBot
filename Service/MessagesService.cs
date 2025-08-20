@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Chat.DTOS;
+using Chat.HttpClients.Interface;
 using Chat.Models;
 using Chat.Repository.Interfaces;
 using Chat.Service.Interfaces;
@@ -13,12 +14,12 @@ namespace BotChat.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly HttpClient _httpClient;
-        public MessagesService(IUnitOfWork unitOfWork, IMapper mapper, IHttpClientFactory httpClient)
+        private readonly IExternalApi _externalApi;
+        public MessagesService(IUnitOfWork unitOfWork, IMapper mapper, IExternalApi externalApi)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _httpClient = httpClient.CreateClient();
+            _externalApi = externalApi;
         }
         public async Task<String> AddMessageAsync(MessagesDTO messagesDTO)
         {
@@ -27,16 +28,7 @@ namespace BotChat.Service
                 messagesDTO.User = "User";
                 var result = await AddAsync(messagesDTO);
 
-                var response = await _httpClient.GetAsync($"http://127.0.0.1:8000/search?query={messagesDTO.Content}");
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Error fetching data from external service: {responseContent}");
-                }
-
-                // Parse JSON để lấy giá trị "context"
-                using var jsonDoc = JsonDocument.Parse(responseContent);
-                string content = jsonDoc.RootElement.GetProperty("context").GetString();
+                string content = await _externalApi.GetContextAsync(messagesDTO.Content);
 
                 var newMessageDTO = new MessagesDTO
                 {

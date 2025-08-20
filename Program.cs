@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+Ôªøusing System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,13 +15,15 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using BotChat.Service;
+using Chat.HttpClients.Interface;
+using Chat.HttpClients;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// XÛa mapping m?c ??nh c?a JWT claims
+// X√≥a mapping m?c ??nh c?a JWT claims
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-// ??ng k˝ DbContext
+// ??ng k√Ω DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -29,11 +31,11 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "BotChat API", Version = "v1" });
 
-    // C?u hÏnh JWT Bearer cho Swagger
+    // C?u h√¨nh JWT Bearer cho Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Nh?p JWT token v‡o ?‚y (Bearer {token})",
+        Description = "Nh·∫≠p JWT token v√†o ?√¢y (Bearer {token})",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
@@ -66,34 +68,37 @@ builder.Services.AddCors(options =>
     });
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()   // Cho phÈp t?t c? domain (dev)
+        policy.AllowAnyOrigin()   // Cho ph√©p t?t c? domain (dev)
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
 
-// ??ng k˝ Identity
+// ??ng k√Ω Identity
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// ??ng k˝ AutoMapper
+// ??ng k√Ω AutoMapper
 builder.Services.AddAutoMapper(typeof(AppMapperProfile));
 
-// ??ng k˝ Repository
+// ??ng k√Ω Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IConversationsRepository, ConversationsRepository>();
 builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// ??ng k˝ Service
+// ??ng k√Ω Service
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IConversationsService, ConversationsService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// C?u hÏnh x·c th?c JWT
+// ƒêƒÉng k√Ω HttpClient cho c√°c d·ªãch v·ª• b√™n ngo√†i
+builder.Services.AddScoped<IExternalApi, ExternalApi>();
+
+// C?u h√¨nh x√°c th?c JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -123,16 +128,16 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddHttpClient();
 
-// ??ng k˝ Razor Pages
+// ??ng k√Ω Razor Pages
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
-// ??ng k˝ Swagger
+// ??ng k√Ω Swagger
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// S? d?ng Swagger ? mÙi tr??ng ph·t tri?n
+// S? d?ng Swagger ? m√¥i tr??ng ph√°t tri?n
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
