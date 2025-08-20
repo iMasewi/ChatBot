@@ -10,11 +10,14 @@ namespace Chat.Repository
         {
         }
 
-        public async Task<IEnumerable<Messages>> GetMessageAndFollowingAsync(Messages messages)
+        public async Task EditMessageAsync(Messages message)
         {
-            return await _context.Messages
-                .Where(m => m.CreatedAt >= messages.CreatedAt && messages.ConversationId == m.ConversationId)
+            IEnumerable<Messages> messages = await _context.Messages
+                .Where(m => m.CreatedAt >= message.CreatedAt && message.ConversationId == m.ConversationId)
                 .ToListAsync();
+
+            _context.Messages.RemoveRange(messages);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Messages>> GetMessagesByConversationIdAsync(int conversationId)

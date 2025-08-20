@@ -117,12 +117,7 @@ namespace BotChat.Service
                     throw new KeyNotFoundException($"Message with ID {messagesDTO.Id} not found.");
                 }
 
-                IEnumerable<Messages> messages = await _unitOfWork.MessagesRepository.GetMessageAndFollowingAsync(message);
-                foreach (var item in messages)
-                {
-                    await _unitOfWork.MessagesRepository.DeleteAsync(item);
-                }
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.MessagesRepository.EditMessageAsync(message);
 
                 string content = await AddMessageAsync(messagesDTO);
                 return content;
