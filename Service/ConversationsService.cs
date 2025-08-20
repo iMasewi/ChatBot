@@ -15,7 +15,7 @@ namespace Chat.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<int> AddConversationAsync(ConversationsDTO conversationsDTO)
+        public async Task<ConversationsDTO> AddConversationAsync(ConversationsDTO conversationsDTO)
         {
             try
             {
@@ -26,7 +26,8 @@ namespace Chat.Service
                 }
                 await _unitOfWork.ConversationsRepository.AddAsync(conversation);
                 await _unitOfWork.SaveChangesAsync();
-                return conversation.Id;
+                conversationsDTO.Id = conversation.Id;
+                return conversationsDTO;
             }
             catch (Exception ex)
             {

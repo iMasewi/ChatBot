@@ -35,7 +35,7 @@ namespace Chat.Controllers
 
                 conversationsDTO.UserId = userId;
                 var result = await _conversationsService.AddConversationAsync(conversationsDTO);
-                return Ok(new {conversationId = result});
+                return Ok(result);
             }
             catch (Exception ex)
             {

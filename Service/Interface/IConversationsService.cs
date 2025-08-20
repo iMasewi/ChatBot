@@ -7,7 +7,7 @@ namespace Chat.Service.Interfaces
         Task<IEnumerable<ConversationsDTO>> GetAllConversationsAsync();
         Task<IEnumerable<ConversationsDTO>> GetConversationsByUserIdAsync(int userId);
         Task<ConversationsDTO> GetConversationByIdAsync(int id);
-        Task<int> AddConversationAsync(ConversationsDTO conversationsDTO);
+        Task<ConversationsDTO> AddConversationAsync(ConversationsDTO conversationsDTO);
         Task DeleteConversationAsync(int id);
         Task<int> CountConversationsAsync(int userId);
     }
